@@ -44,7 +44,7 @@ class SonyDataset(Dataset):
     def __getitem__(self, ind):
 
         gt_fn = self.gt_images[ind]
-        print(gt_fn)
+        #print(gt_fn)
         input_fns = self.input_images[ind]
         assert len(input_fns) == 10
 
@@ -131,7 +131,7 @@ class SonyTestDataset(Dataset):
 
 
 if __name__ == "__main__":
-    dataset = SonyDataset(input_dir='./testdata/short/', gt_dir='./testdata/long/')
+    dataset = SonyDataset(input_dir='/data/hsun/SIDSony/Sony/short/', gt_dir='/data/hsun/SIDSony/Sony/long/')
     print("Total training pairs in dataset is ", len(dataset))
     loader = torch.utils.data.DataLoader(dataset=dataset, batch_size=1)
     for inputs, gt in loader:

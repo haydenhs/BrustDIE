@@ -22,12 +22,14 @@ def train(args):
 
     # data
     print('===> Loading datasets')
+    print(args.input_dir)
     trainset = SonyDataset(args.input_dir, args.gt_dir, args.ps)
-    train_loader = DataLoader(trainset, batch_size=args.batch_size, shuffle=True, num_workers=8)
+    print(len(trainset))
+    train_loader = DataLoader(trainset, batch_size=args.batch_size, num_workers=8, shuffle=True)
 
     # model
     print('===> Building model')
-    model = UNet().to(device).train()
+    model = UNet(3, 3).to(device).train()
 
     # resume training
     starting_epoch = 0
@@ -89,9 +91,9 @@ def train(args):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="command for training")
-    parser.add_argument('--gpu', type=int, default=0)
-    parser.add_argument('--input_dir', type=str, default='./dataset/Sony/short/')
-    parser.add_argument('--gt_dir', type=str, default='./dataset/Sony/long/')
+    parser.add_argument('--gpu', type=int, default=6)
+    parser.add_argument('--input_dir', type=str, default='/data/hsun/SIDSony/Sony/short/')
+    parser.add_argument('--gt_dir', type=str, default='/data/hsun/SIDSony/Sony/long/')
     parser.add_argument('--checkpoint_dir', type=str, default='./checkpoints/')
     parser.add_argument('--result_dir', type=str, default='./results/')
     parser.add_argument('--ps', type=int, default=512)
@@ -99,7 +101,7 @@ if __name__ == '__main__':
     parser.add_argument('--save_freq', type=int, default=10)
     parser.add_argument('--lr', type=float, default=1e-4)
     parser.add_argument('--wd', type=float, default=0)
-    parser.add_argument('--batch_size', type=int, default=4)
+    parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--num_epoch', type=int, default=200)
     parser.add_argument('--model_save_freq', type=int, default=10)
     parser.add_argument('--resume', type=str, help='continue training')
