@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f44fd460-ac9d-4b20-9f76-2c2f1dc6978b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/create_lmdb.py" beforeDir="false" afterPath="$PROJECT_DIR$/create_lmdb.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -30,8 +29,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/create_lmdb.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="160">
-              <caret line="176" column="36" selection-start-line="176" selection-start-column="36" selection-end-line="176" selection-end-column="36" />
+            <state relative-caret-position="322">
+              <caret line="154" lean-forward="true" selection-start-line="154" selection-end-line="154" />
               <folding>
                 <element signature="e#71#81#0" expanded="true" />
               </folding>
@@ -222,12 +221,12 @@
       <option name="presentableId" value="Default" />
       <updated>1591965220098</updated>
       <workItem from="1591965224827" duration="14627000" />
-      <workItem from="1592100903351" duration="3427000" />
+      <workItem from="1592100903351" duration="4134000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="18054000" />
+    <option name="totallyTimeSpent" value="18761000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-15" y="23" width="1280" height="726" extended-state="0" />
@@ -307,8 +306,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/create_lmdb.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="160">
-          <caret line="176" column="36" selection-start-line="176" selection-start-column="36" selection-end-line="176" selection-end-column="36" />
+        <state relative-caret-position="322">
+          <caret line="154" lean-forward="true" selection-start-line="154" selection-end-line="154" />
           <folding>
             <element signature="e#71#81#0" expanded="true" />
           </folding>

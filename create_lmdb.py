@@ -139,6 +139,7 @@ def Sony(input_dir, gt_dir, patch_size, stride, lmdb_save_path):
 
         # save patches to lmdb
         num_of_patches = gt_patches.shape[0]
+        print("Image id {} contains {} patches.".format(gt_fn[:-5], num_of_patches))
         for i in range(num_of_patches):
 
             key = gt_fn[:-5] + '_' + str(i).zfill(3)
@@ -150,13 +151,13 @@ def Sony(input_dir, gt_dir, patch_size, stride, lmdb_save_path):
         txn = env.begin(write=True)
     txn.commit()
     env.close()
-    print('Finish writing lmdb.')
+    print('Finish writing lmdb. Dataset contains {} pairs'.format(len(keys)))
 
     # create meta information
     meta_info = {}
     meta_info['name'] = 'SIDSony_brust{}_train'.format(10)
     meta_info['resolution'] = '{}_{}_{}_{}'.format(11, patch_size, patch_size, C)
-    meta_info['keys'] = gt_images
+    meta_info['keys'] = keys
     pickle.dump(meta_info, open(os.path.join(lmdb_save_path, 'meta_info.pkl'), "wb"))
     print('Finish creating lmdb meta info.')
 
