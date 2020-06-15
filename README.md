@@ -14,13 +14,13 @@ Dark burst images suffer from the following artifects
 
 * training code
 * miika's work on permutation invariant CNN 
+* Switch to LMDB data format
+* support multi-GPU training
 
 ## Todo list
 
-* Switch to LMDB data format
 * add test code
 * add evaluation code
 * add KPN model
-* support multi-GPU
 * support PSNR/SSIM quality indices
 * support different burst size

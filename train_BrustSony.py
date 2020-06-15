@@ -12,24 +12,31 @@ import torch.nn as nn
 import torch.optim as optim
 #from skimage.measure import compare_psnr, compare_ssim
 
-from data import SonyDataset
+#from data import SonyDataset
+from data_lmdb import SonyDataset
 from models import UNet
 
 
 def train(args):
     # device
     device = torch.device("cuda:%d" % args.gpu if torch.cuda.is_available() else "cpu")
+    # args.seed = random.randint(1, 10000)
+    print("Start seed: ", args.seed)
+    torch.manual_seed(args.seed)
+    if args.cuda:
+        torch.cuda.manual_seed(args.seed)
 
     # data
     print('===> Loading datasets')
-    print(args.input_dir)
-    trainset = SonyDataset(args.input_dir, args.gt_dir, args.ps)
-    print(len(trainset))
+    trainset = SonyDataset(args.input_dir, use_augment=False)
     train_loader = DataLoader(trainset, batch_size=args.batch_size, num_workers=8, shuffle=True)
 
     # model
     print('===> Building model')
-    model = UNet(3, 3).to(device).train()
+    model = UNet(3, 3)
+    if torch.cuda.device_count() > 1:
+        print("===> Let's use", torch.cuda.device_count(), "GPUs.")
+        model = torch.nn.DataParallel(model)
 
     # resume training
     starting_epoch = 0
@@ -37,6 +44,7 @@ def train(args):
         model.load_state_dict(torch.load(args.resume))
         starting_epoch = int(args.resume[-7:-3])
         print('resume at %d epoch' % starting_epoch)
+    model.to(device).train()
 
     # loss function
     color_loss = nn.L1Loss()
@@ -85,15 +93,18 @@ def train(args):
 
         # save models
         if epoch % args.model_save_freq == 0:
-            torch.save(model.state_dict(), args.checkpoint_dir + './model_%d.pth' % epoch)
+            if torch.cuda.device_count() > 1:
+                torch.save(model.module.state_dict(), args.checkpoint_dir + './model_%d.pth' % epoch)
+            else:
+                torch.save(model.state_dict(), args.checkpoint_dir + './model_%d.pth' % epoch)
 
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="command for training")
     parser.add_argument('--gpu', type=int, default=6)
-    parser.add_argument('--input_dir', type=str, default='/data/hsun/SIDSony/Sony/short/')
-    parser.add_argument('--gt_dir', type=str, default='/data/hsun/SIDSony/Sony/long/')
+    parser.add_argument("--seed", type=int, default=100)
+    parser.add_argument('--data_dir', type=str, default='/data/hsun/SIDSony/Sony_train.lmdb')
     parser.add_argument('--checkpoint_dir', type=str, default='./checkpoints/')
     parser.add_argument('--result_dir', type=str, default='./results/')
     parser.add_argument('--ps', type=int, default=512)
