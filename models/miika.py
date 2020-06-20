@@ -65,7 +65,7 @@ class UNet(nn.Module):
     def __init__(self, in_channel, out_channel):
         super(UNet, self).__init__()
 
-        k = 1
+        k = 8
         self.k = k
 
         # Encode
@@ -183,4 +183,6 @@ class UNet(nn.Module):
 
 if __name__ == '__main__':
     net = UNet(in_channel=3, out_channel=3)
-    print(net)
+    a = torch.randn(1, 8, 3, 16, 16)
+    out = net(a)
+    print(out.shape)
