@@ -1,5 +1,5 @@
 import os
-import scipy.io
+import imageio
 import numpy as np
 import logging
 import argparse
@@ -19,11 +19,12 @@ from models import RIDNET
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "6"
 
+
 def train(args):
     # device
     device = torch.device("cuda" if args.gpu else "cpu")
     # args.seed = random.randint(1, 10000)
-    print("Start seed: ", args.seed)
+    logging.info("Start seed: ", args.seed)
     torch.manual_seed(args.seed)
     if args.gpu:
         torch.cuda.manual_seed(args.seed)
@@ -35,7 +36,7 @@ def train(args):
 
     # model
     print('===> Building model')
-    model = RIDNET(n_feats=64, kernel_size=3, reduction=16)
+    model = RIDNET(n_feats=128, kernel_size=3, reduction=16)
     if torch.cuda.device_count() > 1:
         print("===> Let's use", torch.cuda.device_count(), "GPUs.")
         model = torch.nn.DataParallel(model)
@@ -45,7 +46,7 @@ def train(args):
     if args.resume is not None:
         model.load_state_dict(torch.load(args.resume))
         starting_epoch = int(args.resume[-7:-3])
-        print('resume at %d epoch' % starting_epoch)
+        logging.info('resume at %d epoch' % starting_epoch)
     model.to(device).train()
 
     # loss function
@@ -53,17 +54,16 @@ def train(args):
 
     print("===> Setting optimizer")
     optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.wd)
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=1000, gamma=0.1)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=2000, gamma=0.1)
 
     # training
     print("===> Start training")
 
-    for epoch in range(starting_epoch + 1, starting_epoch + args.num_epoch):
+    for epoch in range(starting_epoch, starting_epoch + args.num_epoch):
         losses = []
         scheduler.step()
         for i, (inputs, gt) in enumerate(train_loader):
 
-            #inputs, gt = databatch
             inputs, gt = inputs.to(device), gt.to(device)
 
             # back prop
@@ -76,21 +76,21 @@ def train(args):
             # print statistics
             losses.append(loss.item())
             if (i+1) % args.log_interval == 0:
-                print("===> {}\tEpoch[{}]({}/{}): Loss: {:.6f}".format(
-                    time.ctime(), epoch, i + 1, len(train_loader), loss.item()))
+                logging.info("===> {}\tEpoch[{}]({}/{}): Loss: {:.6f}".format(
+                    time.ctime(), epoch + 1, i + 1, len(train_loader), loss.item()))
 
-            if epoch % args.save_freq == 0:
-                if not os.path.isdir(os.path.join(args.result_dir, '%04d' % epoch)):
-                    os.makedirs(os.path.join(args.result_dir, '%04d' % epoch))
+            if (epoch+1) % args.save_freq == 0:
+                if not os.path.isdir(os.path.join(args.result_dir, '%04d' % (epoch+1))):
+                    os.makedirs(os.path.join(args.result_dir, '%04d' % (epoch+1)))
 
                     gt = gt.cpu().detach().numpy()
                     outputs = outputs.cpu().detach().numpy()
 
                     temp = np.squeeze(np.concatenate((gt[0, :, :, :], outputs[0, :, :, :]), axis=2))
-                    scipy.misc.toimage(temp * 255, high=255, low=0, cmin=0, cmax=255).save(
-                        args.result_dir + '%04d/train_%d.jpg' % (epoch, i))
+                    temp = np.clip(temp*255, 0, 255)
+                    imageio.imwrite(args.result_dir + '%04d/train_%d.jpg' % (epoch+1, i+1), temp)
 
-        print("===> {}\tEpoch {} Training Complete: Avg. Loss: {:.6f}".format(
+        logging.info("===> {}\tEpoch {} Training Complete: Avg. Loss: {:.6f}".format(
                 time.ctime(), epoch, np.mean(losses)))
 
         # save models
@@ -111,13 +111,13 @@ if __name__ == '__main__':
     parser.add_argument('--checkpoint_dir', type=str, default='./checkpoints/')
     parser.add_argument('--result_dir', type=str, default='./results/')
     parser.add_argument('--ps', type=int, default=256)
-    parser.add_argument('--log_interval', type=int, default=5)
-    parser.add_argument('--save_freq', type=int, default=10)
+    parser.add_argument('--log_interval', type=int, default=2)
+    parser.add_argument('--save_freq', type=int, default=200)
     parser.add_argument('--lr', type=float, default=1e-4)
     parser.add_argument('--wd', type=float, default=0)
-    parser.add_argument('--batch_size', type=int, default=4)
-    parser.add_argument('--num_epoch', type=int, default=200)
-    parser.add_argument('--model_save_freq', type=int, default=10)
+    parser.add_argument('--batch_size', type=int, default=16)
+    parser.add_argument('--num_epoch', type=int, default=4000)
+    parser.add_argument('--model_save_freq', type=int, default=500)
     parser.add_argument('--resume', type=str, help='continue training')
     args = parser.parse_args()
 
