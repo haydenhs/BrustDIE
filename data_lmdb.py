@@ -62,7 +62,7 @@ class SonyDataset(data.Dataset):
         key = self.paths[index]
 
         # read from lmdb
-        with env.begin(write=False) as txn:
+        with self.env.begin(write=False) as txn:
             buf = txn.get(key.encode('ascii'))
         data_flat = np.frombuffer(buf, dtype=np.float32)
         N, H, W, C = self.sizes

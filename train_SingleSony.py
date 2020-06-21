@@ -17,14 +17,15 @@ from data_single import SonyDataset
 from models import UNet
 from models import RIDNET
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "6"
 
 def train(args):
     # device
-    device = torch.device("cuda:%d" % args.gpu if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if args.gpu else "cpu")
     # args.seed = random.randint(1, 10000)
     print("Start seed: ", args.seed)
     torch.manual_seed(args.seed)
-    if args.cuda:
+    if args.gpu:
         torch.cuda.manual_seed(args.seed)
 
     # data
@@ -60,15 +61,15 @@ def train(args):
     for epoch in range(starting_epoch + 1, starting_epoch + args.num_epoch):
         losses = []
         scheduler.step()
-        for i, databatch in enumerate(train_loader):
+        for i, (inputs, gt) in enumerate(train_loader):
 
-            inputs, gt = databatch
+            #inputs, gt = databatch
             inputs, gt = inputs.to(device), gt.to(device)
 
             # back prop
             optimizer.zero_grad()
             outputs = model(inputs)
-            loss = color_loss(outputs, gt_patch)
+            loss = color_loss(outputs, gt)
             loss.backward()
             optimizer.step()
 
@@ -82,10 +83,10 @@ def train(args):
                 if not os.path.isdir(os.path.join(args.result_dir, '%04d' % epoch)):
                     os.makedirs(os.path.join(args.result_dir, '%04d' % epoch))
 
-                    gt_patch = gt_patch.cpu().detach().numpy()
+                    gt = gt.cpu().detach().numpy()
                     outputs = outputs.cpu().detach().numpy()
 
-                    temp = np.concatenate((gt_patch[0, :, :, :], outputs[0, :, :, :]), axis=2)
+                    temp = np.squeeze(np.concatenate((gt[0, :, :, :], outputs[0, :, :, :]), axis=2))
                     scipy.misc.toimage(temp * 255, high=255, low=0, cmin=0, cmax=255).save(
                         args.result_dir + '%04d/train_%d.jpg' % (epoch, i))
 
@@ -114,7 +115,7 @@ if __name__ == '__main__':
     parser.add_argument('--save_freq', type=int, default=10)
     parser.add_argument('--lr', type=float, default=1e-4)
     parser.add_argument('--wd', type=float, default=0)
-    parser.add_argument('--batch_size', type=int, default=16)
+    parser.add_argument('--batch_size', type=int, default=4)
     parser.add_argument('--num_epoch', type=int, default=200)
     parser.add_argument('--model_save_freq', type=int, default=10)
     parser.add_argument('--resume', type=str, help='continue training')

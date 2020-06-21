@@ -85,11 +85,11 @@ class SonyDataset(Dataset):
         # random flip vertically
         if np.random.randint(2, size=1)[0] == 1:
             input_patch = np.flip(input_patch, axis=0).copy()
-            gt_patch = np.flip(gt_patch, axis=1).copy()
+            gt_patch = np.flip(gt_patch, axis=0).copy()
         # random flip horizontally
         if np.random.randint(2, size=1)[0] == 1:
             input_patch = np.flip(input_patch, axis=1).copy()
-            gt_patch = np.flip(gt_patch, axis=2).copy()
+            gt_patch = np.flip(gt_patch, axis=1).copy()
         # random transpose
         if np.random.randint(2, size=1)[0] == 1:
             input_patch = np.transpose(input_patch, (1, 0)).copy()
